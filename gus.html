@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IB DP Timetable Maker</title>
+  <meta name="description" content="The ultimate IB DP Timetable Maker to organize your IB life – subjects, deadlines, and more."/>
+  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/en/1/19/International_Baccalaureate_Logo.svg" type="image/svg+xml">
+
+  <!-- Include html2pdf.js CDN for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    /* Reset */
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #64b3f4, #c2e9fb);
+      color: #333;
+      line-height: 1.6;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .dark-mode {
+      background: #121212;
+      color: #f0f0f0;
+    }
+
+    header {
+      background-color: #004b87;
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+      border-bottom: 8px solid #0091cc;
+    }
+
+    header img {
+      width: 60px;
+      margin-bottom: 10px;
+    }
+
+    main {
+      padding: 40px 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .form-container, .assignments-container, .notes {
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+      transition: background-color 0.3s ease;
+    }
+
+    .dark-mode .form-container,
+    .dark-mode .assignments-container,
+    .dark-mode .notes {
+      background: #1e1e1e;
+    }
+
+    label {
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #004b87;
+      outline: none;
+    }
+
+    button {
+      padding: 15px 20px;
+      background-color: #007bff;
+      color: white;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+      user-select: none;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: box-shadow 0.3s ease;
+    }
+
+    table:hover {
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      font-size: 1.1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    th {
+      background-color: #0057a3;
+      color: white;
+      user-select: none;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #e7f0fa;
+    }
+
+    tr {
+      transition: background-color 0.3s ease;
+    }
+
+    tr:hover td {
+      background-color: #cce4f7;
+    }
+
+    td {
+      background-color: #f9f9f9;
+      position: relative;
+    }
+
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .delete-btn:hover {
+      background-color: #a71d2a;
+    }
+
+    .theme-toggle {
+      margin-bottom: 20px;
+      background: #444;
+      width: auto;
+    }
+
+    footer {
+      background-color: #0057a3;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 2em;
+      }
+      button {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="https://upload.wikimedia.org/wikipedia/en/1/19/International_Baccalaureate_Logo.svg" alt="IB Logo" />
+    <h1>IB DP Timetable Maker</h1>
+    <p>Organize your IB life – smart, simple, and stress-free. Stay on top of your deadlines and classes!</p>
+  </header>
+
+  <main>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 Toggle Dark Mode</button>
+
+    <section>
+      <h2>How it Works:</h2>
+      <p>This tool helps IB DP students create and manage weekly timetables, stay on top of deadlines, and keep life organized.</p>
+    </section>
+
+    <div class="form-container">
+      <label for="subject">📘 Subject:</label>
+      <input type="text" id="subject" placeholder="e.g. Math AA HL" />
+
+      <label for="day">📅 Day of the Week:</label>
+      <select id="day">
+        <option value="Monday">Monday</option>
+        <option value="Tuesday">Tuesday</option>
+        <option value="Wednesday">Wednesday</option>
+        <option value="Thursday">Thursday</option>
+        <option value="Friday">Friday</option>
+        <option value="Saturday">Saturday</option>
+        <option value="Sunday">Sunday</option>
+      </select>
+
+      <label for="time">⏰ Time Slot:</label>
+      <input type="text" id="time" placeholder="e.g. 4:00 PM - 5:30 PM" />
+
+      <button onclick="addToTimetable()">➕ Add to Timetable</button>
+      <button onclick="exportPDF()" style="margin-top: 15px; background-color: #28a745;">📄 Export Timetable as PDF</button>
+    </div>
+
+    <h3>Your Timetable</h3>
+    <table id="timetable">
+      <thead>
+        <tr>
+          <th>Day</th>
+          <th>Time</th>
+          <th>Subject</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="assignments-container">
+      <h3>🗓️ IB Assignments Tracker</h3>
+      <label for="assignment-subject">Subject:</label>
+      <input type="text" id="assignment-subject" placeholder="e.g. Chemistry HL" />
+      <label for="assignment-title">Assignment Title:</label>
+      <input type="text" id="assignment-title" placeholder="e.g. IA Report" />
+      <label for="assignment-due">Due Date:</label>
+      <input type="date" id="assignment-due" />
+
+      <button onclick="addAssignment()">➕ Add Assignment</button>
+
+      <table id="assignments-table" style="margin-top: 20px;">
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Assignment</th>
+            <th>Due Date</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="notes">
+      <h3>📝 IB Notes / Deadlines</h3>
+      <textarea id="notes-area" placeholder="Write reminders for EE, IAs, TOK deadlines..."></textarea>
+      <button onclick="saveNotes()" style="margin-top: 10px; background-color: #17a2b8;">💾 Save Notes</button>
+    </div>
+  </main>
+
+  <footer>
+    🌍 Website created by <strong>Fadl Amir</strong> for IB DP students | © 2025
+  </footer>
+
+  <script>
+    // THEME TOGGLE
+    function toggleTheme() {
+      document.body.classList.toggle("dark-mode");
+      localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+
+    // Persist dark mode
+    window.onload = () => {
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+      }
+      loadTable();
+      loadAssignments();
+      loadNotes();
+    };
+
+    // TIMETABLE FUNCTIONS
+    function addToTimetable() {
+      const subject = document.getElementById("subject").value.trim();
+      const day = document.getElementById("day").value;
+      const time = document.getElementById("time").value.trim();
+
+      if (!subject || !time) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      const tableBody = document.querySelector("#timetable tbody");
+      const row = document.createElement("tr");
+
+      const dayCell = document.createElement("td");
+      const timeCell = document.createElement("td");
+      const subjectCell = document.createElement("td");
+      const deleteCell = document.createElement("td");
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "❌";
+      deleteBtn.className = "delete-btn";
+      deleteBtn.onclick = () => {
+        row.remove();
+        saveTable();
+      };
+
+      dayCell.textContent = day;
+      timeCell.textContent = time;
+      subjectCell.textContent = subject;
+      subjectCell.style.backgroundColor = getColorForSubject(subject);
+      deleteCell.appendChild(deleteBtn);
+
+      row.appendChild(dayCell);
+      row.appendChild(timeCell);
+      row.appendChild(subjectCell);
+      row.appendChild(deleteCell);
+      tableBody.appendChild(row);
+
+      document.getElementById("subject").value = "";
+      document.getElementById("time").value = "";
+
+      saveTable();
+    }
+
+    function saveTable() {
+      localStorage.setItem("timetableData", document.querySelector("#timetable tbody").innerHTML);
+    }
+
+    function loadTable() {
+      const saved = localStorage.getItem("timetableData");
+      if (saved) {
+        document.querySelector("#timetable tbody").innerHTML = saved;
+        // Re-bind delete buttons with animations
+        document.querySelectorAll(".delete-btn").forEach(btn => {
+          btn.onclick = () => {
+            btn.closest("tr").remove();
+            saveTable();
+          };
+        });
+      }
+    }
+
+    // ASSIGNMENTS TRACKER
+    function addAssignment() {
+      const subj = document.getElementById("assignment-subject").value.trim();
+      const title = document.getElementById("assignment-title").value.trim();
+      const due = document.getElementById("assignment-due").value;
+
+      if (!subj || !title || !due) {
+        alert("Please fill in all assignment fields.");
+        return;
+      }
+
+      const tbody = document.querySelector("#assignments-table tbody");
+      const row = document.createElement("tr");
+
+      const subjCell = document.createElement("td");
+      const titleCell = document.createElement("td");
+      const dueCell = document.createElement("td");
+      const delCell = document.createElement("td");
+
+      subjCell.textContent = subj;
+      titleCell.textContent = title;
+      dueCell.textContent = new Date(due).toLocaleDateString();
+
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "❌";
+      delBtn.className = "delete-btn";
+      delBtn.onclick = () => {
+        row.remove();
+        saveAssignments();
+      };
+
+      delCell.appendChild(delBtn);
+
+      row.appendChild(subjCell);
+      row.appendChild(titleCell);
+      row.appendChild(dueCell);
+      row.appendChild(delCell);
+
+      tbody.appendChild(row);
+
+      // Clear inputs
+      document.getElementById("assignment-subject").value = "";
+      document.getElementById("assignment-title").value = "";
+      document.getElementById("assignment-due").value = "";
+
+      saveAssignments();
+    }
+
+    function saveAssignments() {
+      localStorage.setItem("assignmentsData", document.querySelector("#assignments-table tbody").innerHTML);
+    }
+
+    function loadAssignments() {
+      const saved = localStorage.getItem("assignmentsData");
+      if (saved) {
+        document.querySelector("#assignments-table tbody").innerHTML = saved;
+        document.querySelectorAll("#assignments-table .delete-btn").forEach(btn => {
+          btn.onclick = () => {
+            btn.closest("tr").remove();
+            saveAssignments();
+          };
+        });
+      }
+    }
+
+    // NOTES
+    function saveNotes() {
+      const notes = document.getElementById("notes-area").value;
+      localStorage.setItem("ibNotes", notes);
+      alert("Notes saved!");
+    }
+
+    function loadNotes() {
+      const saved = localStorage.getItem("ibNotes");
+      if (saved) {
+        document.getElementById("notes-area").value = saved;
+      }
+    }
+
+    // Generate a consistent color for each subject based on string hash
+    function getColorForSubject(subject) {
+      const colors = ["#FFD700", "#98FB98", "#FFB6C1", "#87CEEB", "#FFA07A", "#DDA0DD", "#B0E0E6", "#FF69B4"];
+      let hash = 0;
+      for (let i = 0; i < subject.length; i++) {
+        hash = subject.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return colors[Math.abs(hash) % colors.length];
+    }
+
+    // PDF Export of timetable
+    function exportPDF() {
+      const element = document.getElementById('timetable');
+      const opt = {
+        margin:       0.5,
+        filename:     'IB_DP_Timetable.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
+  </script>
+
+</body>
+</html>
